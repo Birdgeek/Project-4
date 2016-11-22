@@ -1,22 +1,49 @@
 class game:
-  state = "null"
+  state = None
   points = 0
   isRunning = false
   
 class player:
-  color ="null"
-  name = "null"
+  color =None
+  name = None
+  prevRoom = None
+  currentRoom = None
   
+class map:
+  isCreated = false
+  obj = None
   
 def adventure():
   getInfo()
   game.isRunning = true
   game.state = "update"
-  while (isRunning):
+  while (game.isRunning):
       if (game.state == "update"): #Update the map layout and inventory
-        
+          if (map.isCreated == false):
+            map.obj= makePicture(getMediaPath("map.png"))
+            show(map.obj)
+            map.isCreated = true
+          else:
+            updatePos()
+            updateInv()
+            game.state = "move"
+      elif (game.state == "move"): #Have the player pick a direction and move the piece
+          pickDirection()
+          move()
+          game.state = "score"
+      elif (game.state == "score"): #Count the score of the player
+          countScore()
+          game.state = "update"
+      elif (game.state == "end"): #End-game state
+            countScore()
+            writeScore()
+            showEnd()
+            game.isRunning = false
+      else: #Hopefully this never comes up.
+          showError("There was an error in the main game state!\nThis shouldn't have happened.")
+          
 def getInfo():
-  text("Welcome to System Explorer! My name is Zod and I will guide you around \nFirst off, a few questions!")
+  text("Welcome to Meta Explorer! My name is Zod and I will guide you around \nFirst off, a few questions!")
   player.name = requestString("What is your name?")
   player.color = requestString("Hello there, " + player.name +"!\nWhat color do you want to be? \nOptions are: Blue/Red/Green/Purple/Yellow")
   setPlayerColor()
