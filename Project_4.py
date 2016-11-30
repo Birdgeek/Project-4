@@ -12,7 +12,6 @@ class player:
   nextRoom = None
   icon = None
   
-  
 class map:
   isCreated = false
   obj = None
@@ -20,23 +19,24 @@ class map:
   
 class family_room:
   isOccupied = false
+  hasPlayed = false
 
   
 class bedroom:
   isOccupied = false
-  
+  hasPlayed = false
   
 class kitchen:
   isOccupied = false
-  
+  hasPlayed = false
   
 class tv_room:
   isOccupied = false
-  
+  hasPlayed = false
   
 class yard:
   isOccupied = false
-  
+  hasPlayed = false
   
 def adventure():
   getInfo()
@@ -91,8 +91,18 @@ def text(input):
 def updatePos():
   #Move player icon
   #Ask room specific questions
-  None
-  
+  if (player.nextRoom == "kitchen"):
+    paint("kitchen")
+  elif (player.nextRoom == "family_room"):
+    paint("family_room")
+  elif (player.nextRoom == "yard"):
+    paint("yard")
+  elif (player.nextRoom == "tv_room"):
+    paint("tv_room")
+  elif (player.nextRoom == "bedroom"):
+    paint("bedroom")
+  else:
+    None
 def updateInv():
   #Ask about picking up items within the room
   None
@@ -100,7 +110,13 @@ def updateInv():
   
 def pickDirection():
   #pick a new direction based on the options available
-  None
+  if (player.currentRoom == "kitchen"):
+  elif (player.currentRoom == "family_room"):
+  elif (player.currentRoom == "yard"):
+  elif (player.currentRoom == "tv_room"):
+  elif (player.currentRoom == "bedroom"):
+  else:
+
   
   
 def move():
@@ -123,7 +139,7 @@ def showEnd():
  #
  #
  
- def setPlayerColor():
+def setPlayerColor():
   txtColor = player.color
   if (txtColor == "Blue") or (txtColor == "blue"):
     player.color = blue
@@ -145,9 +161,9 @@ def showEnd():
     player.color = blue
  
  
- def paint(room):
+def paint(room):
+  whiteout(player.currentRoom)
   if (room == "kitchen"):
-    print("painting kitchen")
     copyColor(432, 288)
     repaint(map.obj)
   elif (room == "family_room"):
@@ -197,3 +213,32 @@ def copyColor(locX, locY):
       locY = locY + 1
     locX = locX + 1
     locY = storeY
+    
+def whteoute(room):
+  locX = 0
+  locY = 0
+  if (room == "kitchen"):
+    locX = 432
+    locY = 288
+  elif (room == "family_room"):
+    locX = 338
+    locY = 179
+  elif (room == "yard"):
+    locX = 596
+    locY = 293
+  elif (room == "tv_room"):
+    locX = 556
+    locY = 65
+  elif (room == "bedroom"):
+    locX = 377
+    locY = 38
+  else:
+    locX = 0
+    locY = 0
+  
+  for x in range(0, getWidth(player.icon)):
+    for y in range(0, getHeight(player.icon)):
+      px = getPixel(map.obj, locX, locY)
+      setColor(px, white)
+      locY = locY + 1
+    locX = locX + 1
