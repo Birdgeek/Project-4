@@ -47,9 +47,9 @@ def adventure():
           if (map.isCreated == false):
             map.obj= makePicture(getMediaPath("map.png"))
             show(map.obj)
-            paint("kitchen")
             player.currentRoom = "kitchen"
-            player.prevRoom = "yard"
+            player.prevRoom = "yard"            
+            paint("kitchen")
             map.isCreated = true
           else:
             updatePos()
@@ -57,7 +57,6 @@ def adventure():
             game.state = "move"
       elif (game.state == "move"): #Have the player pick a direction and move the piece
           pickDirection()
-          move()
           game.state = "score"
       elif (game.state == "score"): #Count the score of the player
           countScore()
@@ -73,8 +72,8 @@ def adventure():
           
 def getInfo():
   text("Welcome to Room Explorer! My name is Zod and I will guide you around!\nYou will explore this world from the viewpoint of a dog.\nFirst off, a few questions!")
-  player.name = requestString("What is your name?")
-  player.color = requestString("Hello there, " + player.name +"!\nWhat color  dog icon do you want to be? \nOptions are: Blue/Red/Green/Purple/Yellow")
+  player.name = smartRequest("What is your name?")
+  player.color = smartRequest("Hello there, " + player.name +"!\nWhat color  dog icon do you want to be? \nOptions are: Blue/Red/Green/Purple/Yellow")
   setPlayerColor()
   
   
@@ -84,25 +83,33 @@ def writeScore():
   file.close()
   
   
-def text(input):
-  showInformation(input)
-  
   
 def updatePos():
   #Move player icon
-  #Ask room specific questions
   if (player.nextRoom == "kitchen"):
     paint("kitchen")
+    player.prevRoom = player.currentRoom
+    player.currentRoom = "kitchen"
   elif (player.nextRoom == "family_room"):
     paint("family_room")
+    player.prevRoom = player.currentRoom
+    player.currentRoom = "family_room"
   elif (player.nextRoom == "yard"):
     paint("yard")
+    player.prevRoom = player.currentRoom
+    player.currentRoom = "yard"
   elif (player.nextRoom == "tv_room"):
     paint("tv_room")
+    player.prevRoom = player.currentRoom
+    player.currentRoom = "tv_room"
   elif (player.nextRoom == "bedroom"):
     paint("bedroom")
+    player.prevRoom = player.currentRoom
+    player.currentRoom = "bedroom"
   else:
     None
+    
+    
 def updateInv():
   #Ask about picking up items within the room
   None
@@ -111,17 +118,67 @@ def updateInv():
 def pickDirection():
   #pick a new direction based on the options available
   if (player.currentRoom == "kitchen"):
+    choice = smartRequest("You can go up or left\nPIck a Direction")
+    if (choice == "up") or (choice == "left"):
+      player.nextRoom = "family_room"
+    elif (game.isRunning == false):
+      return
+    else:
+      text("That isnt an okay direction there doggo")
+      pickDirection()
+        
   elif (player.currentRoom == "family_room"):
+    choice = smartRequest("You can go up, right, or down\nPick a Direction")
+    if (choice == "up"):
+      player.nextRoom = "bedroom"
+    elif (choice == "right"):
+      player.nextRoom = "tv_room"
+    elif (choice == "down"):
+      player.nextRoom = "kitchen"
+    elif (game.isRunning == false):
+      return
+    else:
+      text("That isnt an okay direction there doggo")
+      pickDirection()
+      
   elif (player.currentRoom == "yard"):
+    choice = smartRequest("You can go up or left\nPick a Direction")
+    if (choice == "left"):
+      player.nextRoom = "kitchen"
+    elif (choice == "up"):
+      player.nextRoom = "tv_room"
+    elif (game.isRunning == false):
+      return
+    else:
+      text("That isnt an okay direction there doggo")
+      pickDirection()
+      
   elif (player.currentRoom == "tv_room"):
+    choice = smartRequest("You can go down or left\NPick a Direction")
+    if (choice == "down"):
+      player.nextRoom = "yard"
+    elif (choice == "left"):
+      player.nextRoom = "family_room"
+    elif (game.isRunning == false):
+      return
+    else:
+      text("That isnt an okay direction there doggo")
+      pickDirection()
+        
   elif (player.currentRoom == "bedroom"):
+    choice = smartRequest("You can go down, or right\Pick a Direction")
+    if (choice == "down"):
+      player.nextRoom = "family_room"
+    elif (choice == "right"):
+      player.nextRoom = "tv_room"
+    elif (game.isRunning == false):
+      return
+    else:
+      text("That isnt an okay direction there doggo")
+      pickDirection()
+        
   else:
-
-  
-  
-def move():
-  #Move the player icon to that new room
-  None
+    showError("There was an error in the main game state!\nThis shouldn't have happened.")
   
   
 def countScore():
@@ -133,6 +190,17 @@ def showEnd():
   #Shows stats and the final part of the adventure before exciting
   None
     
+
+def text(input):
+  showInformation(input)
+  
+def smartRequest(str):
+  input = requestString(str)
+  input = input.lower()
+  if (input == "end") or (input == "exit") or (input == "quit"):
+    game.isRunning = false
+  else:
+    return input
  #
  #
  #  EVERY FUNCTION USED TO INTERACT WITH THE PLAYER ICON
@@ -214,7 +282,7 @@ def copyColor(locX, locY):
     locX = locX + 1
     locY = storeY
     
-def whteoute(room):
+def whiteout(room):
   locX = 0
   locY = 0
   if (room == "kitchen"):
@@ -235,10 +303,11 @@ def whteoute(room):
   else:
     locX = 0
     locY = 0
-  
+  storeY = locY
   for x in range(0, getWidth(player.icon)):
     for y in range(0, getHeight(player.icon)):
       px = getPixel(map.obj, locX, locY)
       setColor(px, white)
       locY = locY + 1
     locX = locX + 1
+    locY = storeY
