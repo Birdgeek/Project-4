@@ -83,6 +83,15 @@ def getInfo():
   
   
 def writeScore():
+  file = open(getMediaPath("score.txt"), "rt")
+  str = file.read()
+  file.close()
+  str = str.split("\n")
+  if player.name in str:
+    cut = str[str.find(player.name)]
+    oldScore = cut[len(player.name) + 3:len(cut)]
+    if (oldScore > game.points):
+      break;
   file = open(getMediaPath("score.txt"), "wt")
   file.write(player.name + " - " + game.points)
   file.close()
@@ -140,12 +149,32 @@ def updateInv():
       text("In the family room you see your human rearranging the furniture again!\nWill she ever find one that works?")
   elif (player.currentRoom == "yard"):
     playSound("yard")
+    text("You now see some squirrels running around YOUR YARD! How dare they!!")
   elif (player.currentRoom == "tv_room"):
     playSound("tv_room")
+    text("You find your big brother watching some cartoons on the TV, maybe you can snuggle up next to him and take a nap.")
   elif (player.currentRoom == "bedroom"):
     playSound("bedroom")
+    text("You have returned to your domain, this is the best place in the entire house because you get belly rubs and sleeps in here.")
   else:
     None
+  choice = smartRequest("Do you want to drop any items? Y/N")
+  if (choice == "N") or (choice == "n"):
+    break;
+  else:
+    choice = smartRequest("Which item? Your inventory is displayed in the top left")
+    if (choice == "pizza") and (inv.hasPizza):
+      inv.hasPizza = false
+      paint("no pizza")
+      text("You have dropped pizza")
+    else:
+      text("Looks like you didn't have the pizza")
+    if (choice == "toy") and (inv.hasToy):
+      inv.hasToy = false
+      paint ("no toy")
+      text("You have dropped the toy")
+    else:
+      text("Looks like you didn't have the toy")
   
   
   
@@ -217,7 +246,8 @@ def pickDirection():
   
 def countScore():
   #Add up the points for that room and then add them to the player score
-  None
+  
+  game.points = game.points + 1
   
   
 def showEnd():
@@ -304,6 +334,18 @@ def paint(room):
   elif (room == "yard"):
     copyColor(596, 293)
     repaint(map.obj)
+  elif (room == "pizza"):
+    copyPizza(x, y, false)
+    repaint(map.obj)
+  elif (room == "no pizza"):
+    copyPizza(x, y, true)
+    repaint(map.obj)
+  elif (room == "toy"):
+    copyToy(x, y, false)
+    repaint(map.obj)
+  elif (room == "no toy"):
+    copyToy(x, y, true)
+    repaint(map.obj)
   else:
     repaint(map.obj)
     
@@ -330,6 +372,20 @@ def scaleDown(src, scaleFactor):
   #Copys a chunk from one picture to another, also paints the whole thing to be copied to a unified color
 def copyColor(locX, locY):
   #Copies from input picture from Start-end px and puts it to the target in corresponding location
+  storeY = locY
+  for x in range(0, getWidth(player.icon)):
+    for y in range(0, getHeight(player.icon)):
+      px = getPixel(player.icon, x, y)
+      if (getRed(px) != 255) and (getGreen(px) != 255) and (getBlue(px) != 255):
+        setColor(getPixel(map.obj, locX, locY), player.color)
+      locY = locY + 1
+    locX = locX + 1
+    locY = storeY
+    
+    
+def copyPizza(locX, locY, whiteout):
+  #Copies from input picture from Start-end px and puts it to the target in corresponding location
+  color = 
   storeY = locY
   for x in range(0, getWidth(player.icon)):
     for y in range(0, getHeight(player.icon)):
