@@ -16,6 +16,11 @@ class map:
   isCreated = false
   obj = None
   
+class inv:
+  hasPizza = None
+  hasToy = None
+  hasCatPoop = None
+  
   
 class family_room:
   isOccupied = false
@@ -71,7 +76,7 @@ def adventure():
           
           
 def getInfo():
-  text("Welcome to Room Explorer! My name is Zod and I will guide you around!\nYou will explore this world from the viewpoint of a dog.\nFirst off, a few questions!")
+  text("Welcome to Room Explorer!\nYou will explore this world from the viewpoint of a dog.\nFirst off, a few questions!")
   player.name = smartRequest("What is your name?")
   player.color = smartRequest("Hello there, " + player.name +"!\nWhat color  dog icon do you want to be? \nOptions are: Blue/Red/Green/Purple/Yellow")
   setPlayerColor()
@@ -111,8 +116,37 @@ def updatePos():
     
     
 def updateInv():
-  #Ask about picking up items within the room
-  None
+  #Ask about picking up items within the room also tells story
+  if (player.currentRoom == "kitchen"):
+    playSound("kitchen")
+    if not (inv.hasPizza):
+      choice = smartRequest("You find some pizza on the ground, do you want to pick it up?\nY/N"):
+      if (choice == "Y") or (choice == "y"):
+        inv.hasPizza = true
+        paint("pizza")
+      else:
+        continue
+      text("You see some cake pops up on the counter, I wonder if you can find a way to get up on the counter and eat them")
+  elif (player.currentRoom == "family_room"):
+    playSound("family_room")
+    if not (inv.hasCatPoop):
+      choice = smartRequest("You find some Cat Poop on the couch, do you want to eat it?\nY/N"):
+      if (choice == "Y") or (choice == "y"):
+        inv.hasCatPoop = true
+        game.state = "end"
+        return
+      else:
+        text("Smart choice not eating the cat poop. That would have killed you")
+      text("In the family room you see your human rearranging the furniture again!\nWill she ever find one that works?")
+  elif (player.currentRoom == "yard"):
+    playSound("yard")
+  elif (player.currentRoom == "tv_room"):
+    playSound("tv_room")
+  elif (player.currentRoom == "bedroom"):
+    playSound("bedroom")
+  else:
+    None
+  
   
   
 def pickDirection():
@@ -154,7 +188,7 @@ def pickDirection():
       pickDirection()
       
   elif (player.currentRoom == "tv_room"):
-    choice = smartRequest("You can go down or left\NPick a Direction")
+    choice = smartRequest("You can go down or left\nPick a Direction")
     if (choice == "down"):
       player.nextRoom = "yard"
     elif (choice == "left"):
@@ -190,6 +224,30 @@ def showEnd():
   #Shows stats and the final part of the adventure before exciting
   None
     
+    
+def playSound(room):
+  if (room == "kitchne"):
+    if (kitchen.hasPlayed == false):
+      play(makeSound(getMediaPath("sounds/kitchen.wav")))
+      kitchen.hasPlayed = true
+  elif (room == "yard"):
+    if (yard.hasPlayed == false):
+      play(makeSound(getMediaPath("sounds/yard.wav")))
+      yard.hasPlayed = true
+  elif (room == "family_room"):
+    if (family_room.hasPlayed == false):
+      play(makeSound(getMediaPath("sounds/family_room.wav")))
+      family_room.hasPlayed = true
+  elif (room == "tv_room"):
+    if (tv_room.hasPlayed == false):
+      play(makeSound(getMediaPath("sounds/tv_room.wav")))
+      tv_room.hasPlayed = true
+  elif (room == "bedroom"):
+    if (bedroom.hasPlayed == false):
+      play(makeSound(getMediaPath("sounds/bedroom.wav")))
+      bedroom.hasPlayed = true
+  else:
+    None
 
 def text(input):
   showInformation(input)
