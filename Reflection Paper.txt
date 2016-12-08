@@ -1,0 +1,5 @@
+1. The most challenging aspect of writing this project was figuring out what needs to go where within the main game loop.
+2. The easiest part was carrying over the knowledge of pictures and manipulating them
+3. I would prioritize working on the bulk of the project first isntead of writing all of the main game state. I would have used bottom up instead of top down
+4. The most benneficial thing was combining all of the skills we learned into one big project. Really brought everything together.
+5. Get rid of the sound requirements, it seems annoying and just frustrating to test with.

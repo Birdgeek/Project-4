@@ -20,7 +20,9 @@ class inv:
   hasPizza = None
   hasToy = None
   hasCatPoop = None
-  
+  pizza = None
+  catPoop = None
+  toy = None
   
 class family_room:
   isOccupied = false
@@ -51,15 +53,21 @@ def adventure():
       if (game.state == "update"): #Update the map layout and inventory
           if (map.isCreated == false):
             map.obj= makePicture(getMediaPath("map.png"))
+            inv.pizza = makePicture(getMediaPath("pizza.png"))
+            inv.pizza = scaleDown(inv.pizza, 7)
+            inv.toy = makePicture(getMediaPath("toy.png"))
+            inv.toy = scaleDown(inv.toy, 10)
             show(map.obj)
             player.currentRoom = "kitchen"
             player.prevRoom = "yard"            
             paint("kitchen")
+            file = open(getMediaPath("scores.txt"), "wt")
+            file.close()
             map.isCreated = true
           else:
-            updatePos()
-            updateInv()
             game.state = "move"
+            updatePos()
+            updateInv()           
       elif (game.state == "move"): #Have the player pick a direction and move the piece
           pickDirection()
           game.state = "score"
@@ -83,18 +91,18 @@ def getInfo():
   
   
 def writeScore():
-  file = open(getMediaPath("score.txt"), "rt")
-  str = file.read()
+  file = open(getMediaPath("scores.txt"), "rt")
+  data = file.read()
   file.close()
-  str = str.split("\n")
-  if player.name in str:
-    cut = str[str.find(player.name)]
+  data = data.split("\n")
+  if player.name in data:
+    cut = data[data.find(player.name)]
     oldScore = cut[len(player.name) + 3:len(cut)]
-    if (oldScore > game.points):
-      break;
-  file = open(getMediaPath("score.txt"), "wt")
-  file.write(player.name + " - " + game.points)
-  file.close()
+    if (int(oldScore) > game.points):
+      return
+  score = open(getMediaPath("scores.txt"), "wt")
+  score.write(player.name + " - " + str(game.points) + "\n")
+  score.close()
   
   
   
@@ -102,22 +110,26 @@ def updatePos():
   #Move player icon
   if (player.nextRoom == "kitchen"):
     paint("kitchen")
+    playSound("kitchen")
     player.prevRoom = player.currentRoom
     player.currentRoom = "kitchen"
   elif (player.nextRoom == "family_room"):
     paint("family_room")
+    playSound("family_room")
     player.prevRoom = player.currentRoom
     player.currentRoom = "family_room"
   elif (player.nextRoom == "yard"):
     paint("yard")
+    playSound("yard")
     player.prevRoom = player.currentRoom
     player.currentRoom = "yard"
   elif (player.nextRoom == "tv_room"):
     paint("tv_room")
+    playSound("tv_room")
     player.prevRoom = player.currentRoom
     player.currentRoom = "tv_room"
   elif (player.nextRoom == "bedroom"):
-    paint("bedroom")
+    playSound("bedroom")
     player.prevRoom = player.currentRoom
     player.currentRoom = "bedroom"
   else:
@@ -127,61 +139,68 @@ def updatePos():
 def updateInv():
   #Ask about picking up items within the room also tells story
   if (player.currentRoom == "kitchen"):
-    playSound("kitchen")
+
     if not (inv.hasPizza):
-      choice = smartRequest("You find some pizza on the ground, do you want to pick it up?\nY/N"):
+      choice = smartRequest("You find some pizza on the ground, do you want to pick it up?\nY/N")
       if (choice == "Y") or (choice == "y"):
         inv.hasPizza = true
         paint("pizza")
+        game.points = game.points  + 1
       else:
-        continue
+        None
       text("You see some cake pops up on the counter, I wonder if you can find a way to get up on the counter and eat them")
   elif (player.currentRoom == "family_room"):
-    playSound("family_room")
     if not (inv.hasCatPoop):
-      choice = smartRequest("You find some Cat Poop on the couch, do you want to eat it?\nY/N"):
+      choice = smartRequest("You find some Cat Poop on the couch, do you want to eat it?\nY/N")
       if (choice == "Y") or (choice == "y"):
         inv.hasCatPoop = true
         game.state = "end"
+        game.points = game.points  - 1
         return
       else:
         text("Smart choice not eating the cat poop. That would have killed you")
       text("In the family room you see your human rearranging the furniture again!\nWill she ever find one that works?")
   elif (player.currentRoom == "yard"):
-    playSound("yard")
     text("You now see some squirrels running around YOUR YARD! How dare they!!")
   elif (player.currentRoom == "tv_room"):
-    playSound("tv_room")
     text("You find your big brother watching some cartoons on the TV, maybe you can snuggle up next to him and take a nap.")
   elif (player.currentRoom == "bedroom"):
-    playSound("bedroom")
+    if not (inv.hasToy):
+      choice = smartRequest("You find a toy on the ground, do you want to pick it up?\nY/N")
+      if (choice == "Y") or (choice == "y"):
+        inv.hasToy = true
+        paint("toy")
+        game.points = game.points  + 1
+      else:
+        None
     text("You have returned to your domain, this is the best place in the entire house because you get belly rubs and sleeps in here.")
   else:
     None
-  choice = smartRequest("Do you want to drop any items? Y/N")
-  if (choice == "N") or (choice == "n"):
-    break;
-  else:
-    choice = smartRequest("Which item? Your inventory is displayed in the top left")
-    if (choice == "pizza") and (inv.hasPizza):
-      inv.hasPizza = false
-      paint("no pizza")
-      text("You have dropped pizza")
+  if (inv.hasPizza) or (inv.hasToy):
+    choice = smartRequest("Do you want to drop any items? Y/N")
+    if (choice == "N") or (choice == "n"):
+      return
     else:
-      text("Looks like you didn't have the pizza")
-    if (choice == "toy") and (inv.hasToy):
-      inv.hasToy = false
-      paint ("no toy")
-      text("You have dropped the toy")
-    else:
-      text("Looks like you didn't have the toy")
+      choice = smartRequest("Which item? Your inventory is displayed in the top left")
+      if (choice == "pizza") and (inv.hasPizza):
+        inv.hasPizza = false
+        paint("no pizza")
+        text("You have dropped pizza")
+      elif (choice == "pizza") and not (inv.hasPizza):
+        text("Looks like you didn't have the pizza")
+      if (choice == "toy") and (inv.hasToy):
+        inv.hasToy = false
+        paint ("no toy")
+        text("You have dropped the toy")
+      elif (choice == "toy") and not (inv.hasToy):
+        text("Looks like you didn't have the toy")
   
   
   
 def pickDirection():
   #pick a new direction based on the options available
   if (player.currentRoom == "kitchen"):
-    choice = smartRequest("You can go up or left\nPIck a Direction")
+    choice = smartRequest("You can go up or left\nPick a Direction")
     if (choice == "up") or (choice == "left"):
       player.nextRoom = "family_room"
     elif (game.isRunning == false):
@@ -229,7 +248,7 @@ def pickDirection():
       pickDirection()
         
   elif (player.currentRoom == "bedroom"):
-    choice = smartRequest("You can go down, or right\Pick a Direction")
+    choice = smartRequest("You can go down, or right\nPick a Direction")
     if (choice == "down"):
       player.nextRoom = "family_room"
     elif (choice == "right"):
@@ -252,29 +271,30 @@ def countScore():
   
 def showEnd():
   #Shows stats and the final part of the adventure before exciting
-  None
-    
+  text("Well it looks like you only made it this far doggo")
+  text("You earned " + str(game.points) + " points!")
+  
     
 def playSound(room):
-  if (room == "kitchne"):
+  if (room == "kitchen"):
     if (kitchen.hasPlayed == false):
-      play(makeSound(getMediaPath("sounds/kitchen.wav")))
+      play(makeSound(getMediaPath("WHOOSH.wav")))
       kitchen.hasPlayed = true
   elif (room == "yard"):
     if (yard.hasPlayed == false):
-      play(makeSound(getMediaPath("sounds/yard.wav")))
+      play(makeSound(getMediaPath("WHOOSH.wav")))
       yard.hasPlayed = true
   elif (room == "family_room"):
     if (family_room.hasPlayed == false):
-      play(makeSound(getMediaPath("sounds/family_room.wav")))
+      play(makeSound(getMediaPath("WHOOSH.wav")))
       family_room.hasPlayed = true
   elif (room == "tv_room"):
     if (tv_room.hasPlayed == false):
-      play(makeSound(getMediaPath("sounds/tv_room.wav")))
+      play(makeSound(getMediaPath("WHOOSH.wav")))
       tv_room.hasPlayed = true
   elif (room == "bedroom"):
     if (bedroom.hasPlayed == false):
-      play(makeSound(getMediaPath("sounds/bedroom.wav")))
+      play(makeSound(getMediaPath("WHOOSH.wav")))
       bedroom.hasPlayed = true
   else:
     None
@@ -335,18 +355,16 @@ def paint(room):
     copyColor(596, 293)
     repaint(map.obj)
   elif (room == "pizza"):
-    copyPizza(x, y, false)
+    copyPizza(11, 61, false)
     repaint(map.obj)
   elif (room == "no pizza"):
-    copyPizza(x, y, true)
+    copyPizza(11, 61, true)
     repaint(map.obj)
   elif (room == "toy"):
-    copyToy(x, y, false)
+    copyToy(11, 130, false)
     repaint(map.obj)
   elif (room == "no toy"):
-    copyToy(x, y, true)
-    repaint(map.obj)
-  else:
+    copyToy(11, 130, true)
     repaint(map.obj)
     
     
@@ -383,18 +401,47 @@ def copyColor(locX, locY):
     locY = storeY
     
     
-def copyPizza(locX, locY, whiteout):
+def copyPizza(locX, locY, var):
   #Copies from input picture from Start-end px and puts it to the target in corresponding location
-  color = 
-  storeY = locY
-  for x in range(0, getWidth(player.icon)):
-    for y in range(0, getHeight(player.icon)):
-      px = getPixel(player.icon, x, y)
-      if (getRed(px) != 255) and (getGreen(px) != 255) and (getBlue(px) != 255):
-        setColor(getPixel(map.obj, locX, locY), player.color)
-      locY = locY + 1
-    locX = locX + 1
-    locY = storeY
+  src = inv.pizza
+  if (var == true):
+    storeY = locY
+    for x in range(0, getWidth(src)):
+      for y in range(0, getHeight(src)):
+        setColor(getPixel(map.obj, locX, locY), white)
+        locY = locY + 1
+      locX = locX + 1
+      locY = storeY
+  else:
+    storeY = locY
+    for x in range(0, getWidth(src)):
+      for y in range(0, getHeight(src)):
+        px = getPixel(src, x, y)
+        setColor(getPixel(map.obj, locX, locY), getColor(px))
+        locY = locY + 1
+      locX = locX + 1
+      locY = storeY
+      
+def copyToy(locX, locY, var):
+  #Copies from input picture from Start-end px and puts it to the target in corresponding location
+  src = inv.toy
+  if (var == true):
+    storeY = locY
+    for x in range(0, getWidth(src)):
+      for y in range(0, getHeight(src)):
+        setColor(getPixel(map.obj, locX, locY), white)
+        locY = locY + 1
+      locX = locX + 1
+      locY = storeY
+  else:
+    storeY = locY
+    for x in range(0, getWidth(src)):
+      for y in range(0, getHeight(src)):
+        px = getPixel(src, x, y)
+        setColor(getPixel(map.obj, locX, locY), getColor(px))
+        locY = locY + 1
+      locX = locX + 1
+      locY = storeY
     
 def whiteout(room):
   locX = 0
